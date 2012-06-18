@@ -1,0 +1,23 @@
+{
+        "moray": {
+                "bucket": {
+                        "name": "manta_storage",
+                        "schema": {
+                                "hostname": { "type": "string" },
+                                "availableMB": { "type": "number" },
+                                "percentUsed": { "type": "number" },
+                                "timestamp": { "type": "number" }
+                        }
+                },
+                "connectTimeout": 200,
+                "retry": {
+                        "retries": 2,
+                        "minTimeout": 500
+                },
+                "url": "http://10.99.99.12"
+        },
+        "datacenter": "laptop",
+        "domain": "laptop.com",
+        "objectRoot": "/",
+        "interval": 5000
+}

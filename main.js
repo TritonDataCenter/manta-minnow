@@ -101,6 +101,7 @@ function run(opts) {
                                         return (cb(err));
 
                                 s.hostname = key;
+                                s.datacenter = opts.datacenter;
                                 status = s;
                                 return (cb());
                         });
@@ -162,6 +163,7 @@ _client.putBucket(_bucket, _schema, function (err) {
                 var opts = {
                         bucket: _bucket,
                         client: _client,
+                        datacenter: _cfg.datacenter,
                         domain: _cfg.domain,
                         objectRoot: _cfg.objectRoot
                 };
