@@ -111,23 +111,23 @@ function run(opts) {
                                 key: key,
                                 data: status
                         }, 'Writing current status');
-                        client.put(opts.bucket, key, status, function (err) {
-                                if (err) {
-                                        cb(err);
-                                } else {
-                                        LOG.info({
-                                                bucket: opts.bucket,
-                                                key: key,
-                                                status: status
-                                        }, 'status updated');
-                                        cb();
-                                }
-                        });
+                        client.put(opts.bucket, key, status, cb);
                 }
         ] }, function (err) {
-                if (err)
-                        errorAndExit(err, 'failed to update moray');
-
+                if (err) {
+                        LOG.error({
+                                bucket: opts.bucket,
+                                key: key,
+                                status: status,
+                                err: err
+                        }, 'Failed to update status');
+                } else {
+                        LOG.info({
+                                bucket: opts.bucket,
+                                key: key,
+                                status: status
+                        }, 'status updated');
+                }
         });
 }
 
