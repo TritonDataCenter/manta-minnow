@@ -28,7 +28,7 @@ var ARGV = optimist.options({
 
 var LOG = bunyan.createLogger({
         level: ARGV.d ? (ARGV.d > 1 ? 'trace' : 'debug') : 'info',
-        name: 'muppet',
+        name: 'minnow',
         serializers: {
                 err: bunyan.stdSerializers.err
         },
@@ -79,7 +79,8 @@ function stat(filesystem, callback) {
                         availableMB: Math.floor(free / 1048576),
                         percentUsed: Math.ceil((used / total) * 100),
                         filesystem: filesystem,
-                        statvfs: s
+                        statvfs: s,
+                        timestamp: Date.now()
                 };
 
                 return (callback(null, obj));
