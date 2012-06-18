@@ -1,0 +1,22 @@
+{
+        "name": "minnow",
+        "description": "Agent that publishes disk stats to moray (for picking)",
+        "version": "1.0.0",
+        "author": "Joyent (joyent.com)",
+        "private": true,
+        "dependencies": {
+                "bunyan": "0.8.0",
+                "moray-client": "git+ssh://git@git.joyent.com:moray-client.git#451d6d1bf1ad798c22665d6d124606a918bebad5",
+                "node-uuid": "1.3.3",
+                "optimist": "0.3.4",
+                "statvfs": "1.0.0",
+                "vasync": "1.3.0"
+        },
+        "devDependencies": {
+                "nodeunit": "0.7.4"
+        },
+        "scripts": {
+                "start": "node ./main.js -f ./etc/config.json",
+                "test": "./node_modules/.bin/nodeunit ./test/*.test.js"
+        }
+}
