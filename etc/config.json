@@ -6,7 +6,9 @@
                                 "hostname": { "type": "string" },
                                 "availableMB": { "type": "number" },
                                 "percentUsed": { "type": "number" },
-                                "timestamp": { "type": "number" }
+                                "server_uuid": { "type": "string" },
+                                "timestamp": { "type": "number" },
+                                "zone_uuid": { "type": "string" }
                         }
                 },
                 "connectTimeout": 200,
@@ -19,5 +21,7 @@
         "datacenter": "laptop",
         "domain": "laptop.com",
         "objectRoot": "/",
+        "server_uuid": "e05a6490-bcad-11e1-afa7-0800200c9a66",
+        "zone_uuid": "e91001d0-bcad-11e1-afa7-0800200c9a66",
         "interval": 5000
 }

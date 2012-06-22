@@ -102,6 +102,8 @@ function run(opts) {
 
                                 s.hostname = key;
                                 s.datacenter = opts.datacenter;
+                                s.server_uuid = opts.server_uuid;
+                                s.zone_uuid = opts.zone_uuid;
                                 status = s;
                                 return (cb());
                         });
@@ -165,7 +167,9 @@ _client.putBucket(_bucket, _schema, function (err) {
                         client: _client,
                         datacenter: _cfg.datacenter,
                         domain: _cfg.domain,
-                        objectRoot: _cfg.objectRoot
+                        objectRoot: _cfg.objectRoot,
+                        server_uuid: _cfg.server_uuid,
+                        zone_uuid: _cfg.zone_uuid
                 };
                 run(opts);
         }, (_cfg.interval || 5000));
