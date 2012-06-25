@@ -1,0 +1,27 @@
+{
+        "moray": {
+                "bucket": {
+                        "name": "manta_storage",
+                        "schema": {
+                                "hostname": { "type": "string" },
+                                "availableMB": { "type": "number" },
+                                "percentUsed": { "type": "number" },
+                                "server_uuid": { "type": "string" },
+                                "timestamp": { "type": "number" },
+                                "zone_uuid": { "type": "string" }
+                        }
+                },
+                "connectTimeout": 200,
+                "retry": {
+                        "retries": 2,
+                        "minTimeout": 500
+                },
+                "url": "http://10.99.99.12"
+        },
+        "datacenter": "coal",
+        "domain": "test.coal",
+        "objectRoot": "/",
+        "server_uuid": "e05a6490-bcad-11e1-afa7-0800200c9a66",
+        "zone_uuid": "e91001d0-bcad-11e1-afa7-0800200c9a66",
+        "interval": 5000
+}
