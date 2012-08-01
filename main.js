@@ -1,12 +1,12 @@
 // Copyright (c) 2012, Joyent, Inc. All rights reserved.
 
-var assert = require('assert');
 var fs = require('fs');
 var os = require('os');
 
+var assert = require('assert-plus');
 var bunyan = require('bunyan');
-var moray = require('moray-client');
-var optimist = require('optimist');
+var moray = require('moray');
+var getopt = require('posix-getopt');
 var statvfs = require('statvfs');
 var vasnyc = require('vasync');
 
@@ -14,52 +14,76 @@ var vasnyc = require('vasync');
 
 ///--- Globals
 
-var ARGV = optimist.options({
-        'd': {
-                alias: 'debug',
-                describe: 'debug level'
-        },
-        'f': {
-                alias: 'file',
-                describe: 'configuration file',
-                demand: true
-        }
-}).argv;
-
 var LOG = bunyan.createLogger({
-        level: ARGV.d ? (ARGV.d > 1 ? 'trace' : 'debug') : 'info',
+        level: (process.env.LOG_LEVEL || 'info'),
         name: 'minnow',
         serializers: {
                 err: bunyan.stdSerializers.err
         },
-        src: ARGV.d ? true : false,
         stream: process.stdout
 });
+
+var TIMER;
 
 
 
 ///--- Internal Functions
 
-function errorAndExit(err, msg) {
-        LOG.fatal({err: err}, msg);
+function usage(msg) {
+        if (msg)
+                console.error(msg);
+
+        var str = 'usage: ' + path.basename(process.argv[1]);
+        str += '[-v] [-f file]';
+        console.error(str);
         process.exit(1);
 }
 
 
-function readConfig() {
+function parseOptions() {
+        var option;
+        var opts = {};
+        var parser = new getopt.BasicParser('vf:(file)', process.argv);
+
+        while ((option = parser.getopt()) !== undefined) {
+                switch (option.option) {
+                case 'f':
+                        opts.file = option.optarg;
+                        break;
+
+                case 'v':
+                        // Allows us to set -vvv -> this little hackery
+                        // just ensures that we're never < TRACE
+                        LOG.level(Math.max(bunyan.TRACE, (LOG.level() - 10)));
+                        if (LOG.level() <= bunyan.DEBUG)
+                                LOG = LOG.child({src: true});
+                        break;
+
+                default:
+                        usage();
+                        break;
+                }
+        }
+
+        return (opts);
+}
+
+
+function readConfig(fname) {
         var cfg;
         var file;
 
         try {
-                file = fs.readFileSync(ARGV.f, 'utf8');
+                file = fs.readFileSync(fname, 'utf8');
         } catch (e) {
-                errorAndExit(e, 'unable to read %s', ARGV.f);
+                LOG.fatal(e, 'unable to read %s', fname);
+                process.exit(1);
         }
-
         try {
                 cfg = JSON.parse(file);
         } catch (e) {
-                errorAndExit(e, 'invalid JSON in %s', ARGV.f);
+                LOG.fatal(e, 'invalid JSON in %s', fname);
+                process.exit(1);
         }
 
         return (cfg);
@@ -115,7 +139,7 @@ function run(opts) {
                                 key: key,
                                 data: status
                         }, 'Writing current status');
-                        client.put(opts.bucket, key, status, cb);
+                        client.putObject(opts.bucket, key, status, cb);
                 }
         ] }, function (err) {
                 if (err) {
@@ -136,41 +160,71 @@ function run(opts) {
 }
 
 
+function setupAndRun(cfg) {
+        var bucket = cfg.moray.bucket.name;
+        var client = moray.createClient({
+                connectTimeout: cfg.moray.connectTimeout,
+                log: LOG,
+                host: cfg.moray.host,
+                port: cfg.moray.port
+        });
+        var index = {
+                index: cfg.moray.bucket.index
+        };
+        var timer;
+
+        client.once('connect', function () {
+                LOG.info('morayClient: connected');
+                // Guarantee the bucket exists, then just schedule the runner
+                client.putBucket(bucket, index, function (err) {
+                        if (err) {
+                                LOG.fatal(err, 'unable to putBucket');
+                                process.exit(1);
+                        }
+
+                        LOG.info({
+                                bucket: bucket,
+                                objectRoot: cfg.objectRoot
+                        }, 'Moray bucket Ok. Starting stat daemon');
+                        timer = setInterval(function heartbeat() {
+                                var opts = {
+                                        bucket: bucket,
+                                        client: client,
+                                        datacenter: cfg.datacenter,
+                                        domain: cfg.domain,
+                                        objectRoot: cfg.objectRoot,
+                                        server_uuid: cfg.server_uuid,
+                                        zone_uuid: cfg.zone_uuid
+                                };
+                                run(opts);
+                        }, (cfg.interval || 5000));
+                });
+
+                client.removeAllListeners('error');
+
+                client.once('close', function (had_err) {
+                        LOG.warn('moray client closed, reestablishing...');
+                        clearInterval(timer);
+                        client.removeAllListeners('error');
+                        client = null;
+                        setupAndRun(cfg);
+                });
+
+                client.once('error', function (err) {
+                        LOG.error(err, 'morayClient: underlying error');
+                        // Do nothing- close will fire next
+                });
+        });
+
+        client.once('error', function (err) {
+                LOG.fatal(err, 'morayClient: unable to connect; retrying');
+                client.removeAllListeners('connect');
+                setupAndRun(cfg);
+        });
+}
+
+
+
 ///--- Mainline
 
-// Because everyone asks, the vars here are prefixed with '_' to not consume
-// the global namespace, and then cause scope errors from javascriptlint
-// in functions.
-
-var _cfg = readConfig();
-var _bucket = _cfg.moray.bucket.name;
-var _client = moray.createClient({
-        connectTimeout: _cfg.moray.connectTimeout,
-        log: LOG,
-        url: _cfg.moray.url
-});
-var _schema = {
-        schema: _cfg.moray.bucket.schema
-};
-// Guarantee the bucket exists, then just schedule the runner
-_client.putBucket(_bucket, _schema, function (err) {
-        if (err)
-                errorAndExit(err, 'unable to putBucket');
-
-        LOG.info({
-                bucket: _bucket,
-                objectRoot: _cfg.objectRoot
-        }, 'Moray bucket Ok. Starting stat daemon');
-        setInterval(function heartbeat() {
-                var opts = {
-                        bucket: _bucket,
-                        client: _client,
-                        datacenter: _cfg.datacenter,
-                        domain: _cfg.domain,
-                        objectRoot: _cfg.objectRoot,
-                        server_uuid: _cfg.server_uuid,
-                        zone_uuid: _cfg.zone_uuid
-                };
-                run(opts);
-        }, (_cfg.interval || 5000));
-});
+setupAndRun(readConfig(parseOptions().file));

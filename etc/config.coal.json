@@ -2,7 +2,7 @@
         "moray": {
                 "bucket": {
                         "name": "manta_storage",
-                        "schema": {
+                        "index": {
                                 "hostname": { "type": "string" },
                                 "availableMB": { "type": "number" },
                                 "percentUsed": { "type": "number" },
@@ -16,7 +16,8 @@
                         "retries": 2,
                         "minTimeout": 500
                 },
-                "url": "http://10.99.99.12"
+                "host": "127.0.0.1",
+                "port": 2020
         },
         "datacenter": "coal",
         "domain": "test.coal",
