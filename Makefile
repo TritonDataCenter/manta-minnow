@@ -32,10 +32,7 @@ SMF_MANIFESTS_IN = smf/manifests/minnow.xml.in
 NAME 			= minnow
 PATH			:= $(NODE_INSTALL)/bin:${PATH}
 NODE_PREBUILT_TAG	= zone
-NODE_PREBUILT_VERSION	:= v0.6.19
-
-# RELENG-341: no npm cache is making builds unreliable
-NPM_FLAGS :=
+NODE_PREBUILT_VERSION	:= v0.8.2
 
 include ./tools/mk/Makefile.defs
 include ./tools/mk/Makefile.node_prebuilt.defs

@@ -1,79 +1,26 @@
-# Joyent Engineering Guide
+# Minnow
 
-Repository: <git@git.joyent.com:eng.git>
-Browsing: <https://mo.joyent.com/eng>
-Who: Trent Mick, Dave Pacheco
-Docs: <https://mo.joyent.com/docs/eng>
-Tickets/bugs: <https://devhub.joyent.com/jira/browse/TOOLS>
+Repository: <git@git.joyent.com:minnow.git>
+Browsing: <https://mo.joyent.com/minnow>
+Who: Mark Cavage
+Docs: <https://mo.joyent.com/docs/minnow>
+Tickets/bugs: <https://devhub.joyent.com/jira/browse/MANTA>
 
 
 # Overview
 
-This repo serves two purposes: (1) It defines the guidelines and best
-practices for Joyent engineering work (this is the primary goal), and (2) it
-also provides boilerplate for an SDC project repo, giving you a starting
-point for many of the suggestion practices defined in the guidelines. This is
-especially true for node.js-based REST API projects.
-
-Start with the guidelines: <https://head.no.de/docs/eng>
-
-
-# Repository
-
-    deps/           Git submodules and/or commited 3rd-party deps should go
-                    here. See "node_modules/" for node.js deps.
-    docs/           Project docs (restdown)
-    lib/            Source files.
-    node_modules/   Node.js deps, either populated at build time or commited.
-                    See Managing Dependencies.
-    pkg/            Package lifecycle scripts
-    smf/manifests   SMF manifests
-    smf/methods     SMF method scripts
-    test/           Test suite (using node-tap)
-    tools/          Miscellaneous dev/upgrade/deployment tools and data.
-    Makefile
-    package.json    npm module info (holds the project version)
-    README.md
-
+This repo contains Minnow, the storage utilization agent.
 
 # Development
 
-To run the boilerplate API server:
+You'll need a Moray instance up and running first. Go see the Moray docs on how
+to do that. Once you have it up, you can probably just use the
+`config.coal.json` file located in `./etc`.  Run `make` to bring in all the
+dependencies, then:
 
-    git clone git@git.joyent.com:eng.git
-    cd eng
-    git submodule update --init
-    make all
-    node server.js
+    . ./env.sh
+	node main.js -vv -f ./etc/config.coal.json | bunyan
 
-To update the guidelines, edit "docs/index.restdown" and run `make docs`
-to update "docs/index.html".
-
-Before commiting/pushing run `make prepush` and, if possible, get a code
-review.
-
-
-
-# Testing
-
-    make test
-
-If you project has setup steps necessary for testing, then describe those
-here.
-
-
-# Starting a Repo Based on eng.git
-
-Create a new repo called "some-cool-fish" in your "~/work" dir based on "eng.git":
-Note: run this inside the eng dir.
-
-    ./tools/mkrepo $HOME/work/some-cool-fish
-
-
-# Your Other Sections Here
-
-Add other sections to your README as necessary. E.g. Running a demo, adding
-development data.
-
-
-
+And you should see minnow heartbeating statvfs output to moray.  You should be
+able to kill off the remote moray instance and restart it to see reconnect logic
+working.
