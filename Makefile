@@ -30,7 +30,6 @@ SMF_MANIFESTS_IN = smf/manifests/minnow.xml.in
 #
 
 NAME 			= minnow
-PATH			:= $(NODE_INSTALL)/bin:${PATH}
 NODE_PREBUILT_TAG	= zone
 NODE_PREBUILT_VERSION	:= v0.8.6
 
@@ -38,6 +37,8 @@ include ./tools/mk/Makefile.defs
 include ./tools/mk/Makefile.node_prebuilt.defs
 include ./tools/mk/Makefile.node_deps.defs
 include ./tools/mk/Makefile.smf.defs
+
+PATH			:= $(NODE_INSTALL)/bin:${PATH}
 
 #
 # MG Variables
