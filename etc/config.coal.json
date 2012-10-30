@@ -13,10 +13,11 @@
                 },
                 "connectTimeout": 200,
                 "retry": {
-                        "retries": 2,
-                        "minTimeout": 500
+                        "retries": null,
+                        "minTimeout": 1000,
+                        "maxTimeout": 60000
                 },
-                "host": "127.0.0.1",
+                "host": "1.moray.coal.joyent.us",
                 "port": 2020
         },
         "datacenter": "coal",

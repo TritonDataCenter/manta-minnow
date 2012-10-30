@@ -2,13 +2,13 @@
 
 var fs = require('fs');
 var os = require('os');
+var path = require('path');
 
 var assert = require('assert-plus');
 var bunyan = require('bunyan');
 var moray = require('moray');
 var getopt = require('posix-getopt');
 var statvfs = require('statvfs');
-var vasnyc = require('vasync');
 
 
 
@@ -22,23 +22,13 @@ var LOG = bunyan.createLogger({
         },
         stream: process.stdout
 });
-
+var HEARTBEAT;
+var INTERVAL;
 var TIMER;
 
 
 
-///--- Internal Functions
-
-function usage(msg) {
-        if (msg)
-                console.error(msg);
-
-        var str = 'usage: ' + path.basename(process.argv[1]);
-        str += '[-v] [-f file]';
-        console.error(str);
-        process.exit(1);
-}
-
+///--- CLI Functions
 
 function parseOptions() {
         var option;
@@ -90,6 +80,87 @@ function readConfig(fname) {
 }
 
 
+function usage(msg) {
+        if (msg)
+                console.error(msg);
+
+        var str = 'usage: ' + path.basename(process.argv[1]);
+        str += '[-v] [-f file]';
+        console.error(str);
+        process.exit(1);
+}
+
+
+
+///--- worker functions
+
+
+function createMorayClient(opts, cb) {
+        assert.object(opts, 'options');
+        assert.optionalObject(opts.retry, 'options.retry');
+        assert.func(cb, 'callback');
+
+        var retry = opts.retry || {};
+        var client = moray.createClient({
+                connectTimeout: opts.connectTimeout,
+                log: LOG,
+                host: opts.host,
+                port: opts.port,
+                retry: (opts.retry === false ? false : {
+                        retries: retry.retries || Infinity,
+                        minTimeout: retry.minTimeout || 1000,
+                        maxTimeout: retry.maxTimeout || 60000
+                })
+        });
+
+        function onConnect() {
+                client.removeListener('error', onError);
+                LOG.info({moray: client.toString()}, 'moray: connected');
+
+                client.on('close', function () {
+                        LOG.error('moray: closed: stopping heartbeater');
+                        clearInterval(TIMER);
+                });
+
+                client.on('connect', function () {
+                        LOG.info('moray: reconnected: starting heartbeater');
+                        TIMER = setInterval(HEARTBEAT, INTERVAL);
+                });
+
+                client.on('error', function (err) {
+                        LOG.warn(err, 'moray: error (reconnecting)');
+                });
+
+                cb(null, client);
+        }
+
+        function onError(err) {
+                client.removeListener('connect', onConnect);
+                LOG.error(err, 'moray: connection failed');
+                setTimeout(createMorayClient.bind(null, opts, cb), 1000);
+        }
+
+        function onConnectAttempt(number, delay) {
+                var level;
+                if (number === 0) {
+                        level = 'info';
+                } else if (number < 5) {
+                        level = 'warn';
+                } else {
+                        level = 'error';
+                }
+                LOG[level]({
+                        attempt: number,
+                        delay: delay
+                }, 'moray: connection attempted');
+        }
+
+        client.once('connect', onConnect);
+        client.once('error', onError);
+        client.on('connectAttempt', onConnectAttempt); // this we always use
+}
+
+
 function stat(filesystem, callback) {
         statvfs(filesystem, function (err, s) {
                 if (err)
@@ -112,114 +183,40 @@ function stat(filesystem, callback) {
 }
 
 
-function run(opts) {
-        var client = opts.client;
+function heartbeat(opts) {
+        assert.object(opts, 'options');
+        assert.string(opts.bucket, 'options.bucket');
+        assert.string(opts.datacenter, 'options.datacenter');
+        assert.string(opts.domain, 'options.domain');
+        assert.object(opts.moray, 'options.moray');
+        assert.string(opts.objectRoot, 'options.objectRoot');
+        assert.string(opts.server_uuid, 'options.server_uuid');
+        assert.string(opts.zone_uuid, 'options.zone_uuid');
+
         var key = os.hostname() + '.' + opts.domain;
-        var status;
-
-
-        vasnyc.pipeline({ funcs: [
-                function statfs(_, cb) {
-                        stat(opts.objectRoot, function (err, s) {
-                                if (err)
-                                        return (cb(err));
-
-                                s.hostname = key;
-                                s.datacenter = opts.datacenter;
-                                s.server_uuid = opts.server_uuid;
-                                s.zone_uuid = opts.zone_uuid;
-                                status = s;
-                                return (cb());
-                        });
-                },
-
-                function updateMoray(_, cb) {
-                        LOG.debug({
-                                bucket: opts.bucket,
-                                key: key,
-                                data: status
-                        }, 'Writing current status');
-                        client.putObject(opts.bucket, key, status, cb);
+        stat(opts.objectRoot, function (stat_err, stats) {
+                if (stat_err) {
+                        LOG.error(stat_err, 'unable to call statvfs');
+                        return;
                 }
-        ] }, function (err) {
-                if (err) {
-                        LOG.error({
-                                bucket: opts.bucket,
-                                key: key,
-                                status: status,
-                                err: err
-                        }, 'Failed to update status');
-                } else {
-                        LOG.info({
-                                bucket: opts.bucket,
-                                key: key,
-                                status: status
-                        }, 'status updated');
-                }
-        });
-}
 
+                stats.hostname = key;
+                stats.datacenter = opts.datacenter;
+                stats.server_uuid = opts.server_uuid;
+                stats.zone_uuid = opts.zone_uuid;
 
-function setupAndRun(cfg) {
-        var bucket = cfg.moray.bucket.name;
-        var client = moray.createClient({
-                connectTimeout: cfg.moray.connectTimeout,
-                log: LOG,
-                host: cfg.moray.host,
-                port: cfg.moray.port
-        });
-        var index = {
-                index: cfg.moray.bucket.index
-        };
-        var timer;
-
-        client.once('connect', function () {
-                LOG.info('morayClient: connected');
-                // Guarantee the bucket exists, then just schedule the runner
-                client.putBucket(bucket, index, function (err) {
+                opts.moray.putObject(opts.bucket, key, stats, function (err) {
                         if (err) {
-                                LOG.fatal(err, 'unable to putBucket');
-                                process.exit(1);
+                                LOG.error(err, 'moray: update failed');
+                                return;
                         }
 
                         LOG.info({
-                                bucket: bucket,
-                                objectRoot: cfg.objectRoot
-                        }, 'Moray bucket Ok. Starting stat daemon');
-                        timer = setInterval(function heartbeat() {
-                                var opts = {
-                                        bucket: bucket,
-                                        client: client,
-                                        datacenter: cfg.datacenter,
-                                        domain: cfg.domain,
-                                        objectRoot: cfg.objectRoot,
-                                        server_uuid: cfg.server_uuid,
-                                        zone_uuid: cfg.zone_uuid
-                                };
-                                run(opts);
-                        }, (cfg.interval || 5000));
+                                bucket: opts.bucket,
+                                key: key,
+                                stats: stats
+                        }, 'heartbeat: complete');
                 });
-
-                client.removeAllListeners('error');
-
-                client.once('close', function (had_err) {
-                        LOG.warn('moray client closed, reestablishing...');
-                        clearInterval(timer);
-                        client.removeAllListeners('error');
-                        client = null;
-                        setupAndRun(cfg);
-                });
-
-                client.once('error', function (err) {
-                        LOG.error(err, 'morayClient: underlying error');
-                        // Do nothing- close will fire next
-                });
-        });
-
-        client.once('error', function (err) {
-                LOG.fatal(err, 'morayClient: unable to connect; retrying');
-                client.removeAllListeners('connect');
-                setupAndRun(cfg);
         });
 }
 
@@ -227,4 +224,36 @@ function setupAndRun(cfg) {
 
 ///--- Mainline
 
-setupAndRun(readConfig(parseOptions().file));
+var _opts = parseOptions();
+var _cfg = readConfig(_opts.file);
+
+createMorayClient(_cfg.moray, function (_, client) { // never returns err
+
+        var bname = _cfg.moray.bucket.name;
+        var index = _cfg.moray.bucket.index;
+        client.putBucket(bname, {index: index}, function (err) {
+                if (err) {
+                        LOG.fatal(err, 'moray.putBucket: failed');
+                        process.exit(1);
+                }
+
+                LOG.info({
+                        bucket: _cfg.moray.bucket,
+                        objectRoot: _cfg.objectRoot
+                }, 'moray setup done: starting stat daemon');
+
+                // Set up globals so we can disable/reenable in the moray
+                // connection status handlers
+                INTERVAL = _cfg.interval || 30000;
+                HEARTBEAT = heartbeat.bind(null, {
+                        bucket: bname,
+                        datacenter: _cfg.datacenter,
+                        domain: _cfg.domain,
+                        moray: client,
+                        objectRoot: _cfg.objectRoot,
+                        server_uuid: _cfg.server_uuid,
+                        zone_uuid: _cfg.zone_uuid
+                });
+                TIMER = setInterval(HEARTBEAT, INTERVAL);
+        });
+});
