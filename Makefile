@@ -40,6 +40,8 @@ include ./tools/mk/Makefile.smf.defs
 
 PATH			:= $(NODE_INSTALL)/bin:${PATH}
 
+CLEAN_FILES += node_modules
+
 #
 # MG Variables
 #

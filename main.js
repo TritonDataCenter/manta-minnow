@@ -8,6 +8,7 @@ var assert = require('assert-plus');
 var bunyan = require('bunyan');
 var moray = require('moray');
 var getopt = require('posix-getopt');
+var once = require('once');
 var statvfs = require('statvfs');
 
 
@@ -100,6 +101,8 @@ function createMorayClient(opts, cb) {
         assert.optionalObject(opts.retry, 'options.retry');
         assert.func(cb, 'callback');
 
+        cb = once(cb);
+
         var retry = opts.retry || {};
         var client = moray.createClient({
                 connectTimeout: opts.connectTimeout,
@@ -113,17 +116,34 @@ function createMorayClient(opts, cb) {
                 })
         });
 
+        function setup() {
+                var bname = opts.bucket.name;
+                var index = opts.bucket.index;
+
+                client.putBucket(bname, {index: index}, function (err) {
+                        if (err) {
+                                LOG.error(err, 'moray: putBucket: failed');
+                                setTimeout(function () {
+                                        setup();
+                                }, 2000);
+                                return;
+                        }
+
+                        cb(null, client);
+                });
+        }
+
         function onConnect() {
                 client.removeListener('error', onError);
                 LOG.info({moray: client.toString()}, 'moray: connected');
 
                 client.on('close', function () {
-                        LOG.error('moray: closed: stopping heartbeater');
+                        LOG.error('moray: closed: stopping heartbeats');
                         clearInterval(TIMER);
                 });
 
                 client.on('connect', function () {
-                        LOG.info('moray: reconnected: starting heartbeater');
+                        LOG.info('moray: connect: starting heartbeats');
                         TIMER = setInterval(HEARTBEAT, INTERVAL);
                 });
 
@@ -131,7 +151,7 @@ function createMorayClient(opts, cb) {
                         LOG.warn(err, 'moray: error (reconnecting)');
                 });
 
-                cb(null, client);
+                setup();
         }
 
         function onError(err) {
@@ -227,33 +247,25 @@ function heartbeat(opts) {
 var _opts = parseOptions();
 var _cfg = readConfig(_opts.file);
 
-createMorayClient(_cfg.moray, function (_, client) { // never returns err
+createMorayClient(_cfg.moray, function (err, client) {
+        assert.ifError(err); // should never return error
 
-        var bname = _cfg.moray.bucket.name;
-        var index = _cfg.moray.bucket.index;
-        client.putBucket(bname, {index: index}, function (err) {
-                if (err) {
-                        LOG.fatal(err, 'moray.putBucket: failed');
-                        process.exit(1);
-                }
+        LOG.info({
+                bucket: _cfg.moray.bucket,
+                objectRoot: _cfg.objectRoot
+        }, 'moray setup done: starting stat daemon');
 
-                LOG.info({
-                        bucket: _cfg.moray.bucket,
-                        objectRoot: _cfg.objectRoot
-                }, 'moray setup done: starting stat daemon');
-
-                // Set up globals so we can disable/reenable in the moray
-                // connection status handlers
-                INTERVAL = _cfg.interval || 30000;
-                HEARTBEAT = heartbeat.bind(null, {
-                        bucket: bname,
-                        datacenter: _cfg.datacenter,
-                        domain: _cfg.domain,
-                        moray: client,
-                        objectRoot: _cfg.objectRoot,
-                        server_uuid: _cfg.server_uuid,
-                        zone_uuid: _cfg.zone_uuid
-                });
-                TIMER = setInterval(HEARTBEAT, INTERVAL);
+        // Set up globals so we can disable/reenable in the moray
+        // connection status handlers
+        INTERVAL = _cfg.interval || 30000;
+        HEARTBEAT = heartbeat.bind(null, {
+                bucket: _cfg.moray.bucket.name,
+                datacenter: _cfg.datacenter,
+                domain: _cfg.domain,
+                moray: client,
+                objectRoot: _cfg.objectRoot,
+                server_uuid: _cfg.server_uuid,
+                zone_uuid: _cfg.zone_uuid
         });
+        TIMER = setInterval(HEARTBEAT, INTERVAL);
 });

@@ -9,6 +9,7 @@
                 "bunyan": "0.14.6",
                 "moray": "git+ssh://git@git.joyent.com:node-moray.git#master",
                 "node-uuid": "1.4.0",
+                "once": "1.1.1",
                 "posix-getopt": "1.0.0",
                 "statvfs": "1.0.0"
         },
