@@ -31,7 +31,7 @@ SMF_MANIFESTS_IN = smf/manifests/minnow.xml.in
 
 NAME 			= minnow
 NODE_PREBUILT_TAG	= zone
-NODE_PREBUILT_VERSION	:= v0.8.14
+NODE_PREBUILT_VERSION	:= v0.8.21
 
 include ./tools/mk/Makefile.defs
 include ./tools/mk/Makefile.node_prebuilt.defs
