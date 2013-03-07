@@ -212,6 +212,8 @@ function heartbeat(opts) {
         assert.string(opts.objectRoot, 'options.objectRoot');
         assert.string(opts.server_uuid, 'options.server_uuid');
         assert.string(opts.zone_uuid, 'options.zone_uuid');
+        assert.string(opts.manta_compute_id, 'options.manta_compute_id');
+        assert.string(opts.manta_storage_id, 'options.manta_storage_id');
 
         var key = os.hostname() + '.' + opts.domain;
         stat(opts.objectRoot, function (stat_err, stats) {
@@ -224,6 +226,8 @@ function heartbeat(opts) {
                 stats.datacenter = opts.datacenter;
                 stats.server_uuid = opts.server_uuid;
                 stats.zone_uuid = opts.zone_uuid;
+                stats.manta_compute_id = opts.manta_compute_id;
+                stats.manta_storage_id = opts.manta_storage_id;
 
                 opts.moray.putObject(opts.bucket, key, stats, function (err) {
                         if (err) {
@@ -265,7 +269,9 @@ createMorayClient(_cfg.moray, function (err, client) {
                 moray: client,
                 objectRoot: _cfg.objectRoot,
                 server_uuid: _cfg.server_uuid,
-                zone_uuid: _cfg.zone_uuid
+                zone_uuid: _cfg.zone_uuid,
+                manta_compute_id: _cfg.manta_compute_id,
+                manta_storage_id: _cfg.manta_storage_id
         });
         TIMER = setInterval(HEARTBEAT, INTERVAL);
 });
