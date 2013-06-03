@@ -5,8 +5,8 @@
         "author": "Joyent (joyent.com)",
         "private": true,
         "dependencies": {
-                "assert-plus": "0.1.2",
-                "bunyan": "0.14.6",
+                "assert-plus": "0.1.3",
+                "bunyan": "0.21.3",
                 "moray": "git+ssh://git@git.joyent.com:node-moray.git#master",
                 "node-uuid": "1.4.0",
                 "once": "1.1.1",
