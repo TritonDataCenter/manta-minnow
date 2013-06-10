@@ -1,0 +1,5 @@
+{
+    "name": "minnow",
+    "path": "/opt/smartdc/minnow/etc/config.json",
+	"master": true
+}
