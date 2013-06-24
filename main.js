@@ -203,6 +203,30 @@ function stat(filesystem, callback) {
 }
 
 
+
+function verifyConfig(cfg) {
+        function assertNonEmptyString(s, label) {
+                assert.string(s, label);
+                if (s.length === 0) {
+                        LOG.fatal({
+                                option: label
+                        }, 'option is empty');
+                        process.exit(1);
+                }
+        }
+
+        assertNonEmptyString(cfg.moray.bucket.name, 'cfg.moray.bucket.name');
+        assertNonEmptyString(cfg.datacenter, 'cfg.datacenter');
+        assertNonEmptyString(cfg.domain, 'cfg.domain');
+        assertNonEmptyString(cfg.objectRoot, 'cfg.objectRoot');
+        assertNonEmptyString(cfg.server_uuid, 'cfg.server_uuid');
+        assertNonEmptyString(cfg.zone_uuid, 'cfg.zone_uuid');
+        assertNonEmptyString(cfg.manta_compute_id, 'cfg.manta_compute_id');
+        assertNonEmptyString(cfg.manta_storage_id, 'cfg.manta_storage_id');
+}
+
+
+
 function heartbeat(opts) {
         assert.object(opts, 'options');
         assert.string(opts.bucket, 'options.bucket');
@@ -250,6 +274,7 @@ function heartbeat(opts) {
 
 var _opts = parseOptions();
 var _cfg = readConfig(_opts.file);
+verifyConfig(_cfg);
 
 createMorayClient(_cfg.moray, function (err, client) {
         assert.ifError(err); // should never return error
