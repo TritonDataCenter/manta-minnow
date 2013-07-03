@@ -1,32 +1,33 @@
 {
-	"moray": {
-		"bucket": {
-			"name": "manta_storage",
-			"index": {
-				"hostname": { "type": "string" },
-				"availableMB": { "type": "number" },
-				"percentUsed": { "type": "number" },
-				"server_uuid": { "type": "string" },
-				"timestamp": { "type": "number" },
-				"zone_uuid": { "type": "string" },
-				"manta_compute_id": { "type": "string" },
-				"manta_storage_id": { "type": "string" }
-			}
-		},
-		"connectTimeout": 200,
-		"retry": {
-			"retries": 2,
-			"minTimeout": 500
-		},
-		"host": "{{STORAGE_MORAY_SHARD}}",
-		"port": 2020
-	},
-	"datacenter": "{{DATACENTER}}",
-	"domain": "{{SERVICE_NAME}}",
-	"objectRoot": "/manta",
-	"manta_storage_id": "{{MANTA_STORAGE_ID}}",
-	"manta_compute_id": "{{MANTA_COMPUTE_ID}}",
-	"server_uuid": "{{SERVER_UUID}}",
-	"zone_uuid": "{{ZONE_UUID}}",
-	"interval": 5000
+        "moray": {
+                "bucket": {
+                        "name": "manta_storage",
+                        "index": {
+                                "hostname": { "type": "string" },
+                                "availableMB": { "type": "number" },
+                                "percentUsed": { "type": "number" },
+                                "server_uuid": { "type": "string" },
+                                "timestamp": { "type": "number" },
+                                "zone_uuid": { "type": "string" },
+                                "manta_compute_id": { "type": "string" },
+                                "manta_storage_id": { "type": "string" }
+                        }
+                },
+                "connectTimeout": 2000,
+                "maxConnections": 1,
+                "retry": {
+                        "minTimeout": 2000,
+                        "maxTimeout": 120000
+                },
+                "host": "{{STORAGE_MORAY_SHARD}}",
+                "port": 2020
+        },
+        "datacenter": "{{DATACENTER}}",
+        "domain": "{{SERVICE_NAME}}",
+        "objectRoot": "/manta",
+        "manta_storage_id": "{{MANTA_STORAGE_ID}}",
+        "manta_compute_id": "{{MANTA_COMPUTE_ID}}",
+        "server_uuid": "{{SERVER_UUID}}",
+        "zone_uuid": "{{ZONE_UUID}}",
+        "interval": 5000
 }

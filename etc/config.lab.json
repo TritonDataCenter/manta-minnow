@@ -14,16 +14,16 @@
             }
         },
         "connectTimeout": 200,
+        "maxConnections": 1,
         "retry": {
-            "retries": null,
             "minTimeout": 1000,
             "maxTimeout": 60000
         },
-        "host": "1.moray.coal.joyent.us",
+        "host": "1.moray.bh1.joyent.us",
         "port": 2020
     },
-    "datacenter": "coal",
-    "domain": "test.coal",
+    "datacenter": "bh1",
+    "domain": "test.bh1.joyent.us",
     "objectRoot": "/",
     "server_uuid": "e05a6490-bcad-11e1-afa7-0800200c9a66",
     "zone_uuid": "e91001d0-bcad-11e1-afa7-0800200c9a66",
