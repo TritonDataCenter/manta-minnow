@@ -8,6 +8,7 @@ var assert = require('assert-plus');
 var bunyan = require('bunyan');
 var dashdash = require('dashdash');
 var libmanta = require('libmanta');
+var http = require('http');
 var moray = require('moray');
 var once = require('once');
 var statvfs = require('statvfs');
@@ -43,6 +44,7 @@ var OPTIONS = [
 var HEARTBEAT;
 var INTERVAL;
 var TIMER;
+var LAST_ERROR;
 
 
 
@@ -217,9 +219,11 @@ function heartbeat(opts) {
         opts.moray.putObject(opts.bucket, key, stats, function (err) {
             if (err) {
                 LOG.error(err, 'moray: update failed');
+                LAST_ERROR = err;
                 return;
             }
 
+            LAST_ERROR = null;
             LOG.info({
                 bucket: opts.bucket,
                 key: key,
@@ -260,5 +264,14 @@ function heartbeat(opts) {
         });
 
         TIMER = setInterval(HEARTBEAT, INTERVAL);
+
+        http.createServer(function (request, response) {
+            if (LAST_ERROR) {
+                response.writeHead(503, 'Moray Put Error');
+            } else {
+                response.writeHead(204);
+            }
+            response.end();
+        }).listen(cfg.pingPort || 3030);
     });
 })();

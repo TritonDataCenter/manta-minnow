@@ -22,6 +22,7 @@
         "host": "1.moray.coal.joyent.us",
         "port": 2020
     },
+    "pingPort": 3030,
     "datacenter": "coal",
     "domain": "test.coal",
     "objectRoot": "/",
