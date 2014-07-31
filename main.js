@@ -142,9 +142,10 @@ function createMorayClient(opts, cb) {
     });
 
     function onConnectError(err) {
-        LOG.fatal(err, 'moray: connect: failed');
+        LOG.error(err, 'moray: connect: failed; will retry in 5 seconds');
         client.removeListener('connect', onConnectSetup);
-        cb(err);
+        client.close();
+        setTimeout(createMorayClient.bind(null, opts, cb), 5000);
     }
 
     function onConnectSetup() {
@@ -154,8 +155,10 @@ function createMorayClient(opts, cb) {
         client.removeListener('error', onConnectError);
         client.putBucket(bname, {index: index}, function (err) {
             if (err) {
-                LOG.fatal(err, 'moray: putBucket: failed');
-                cb(err);
+                LOG.error(err, 'moray: putBucket: failed; will retry in 5 ' +
+                          'seconds');
+                client.close();
+                setTimeout(createMorayClient.bind(null, opts, cb), 5000);
             } else {
                 LOG.info('moray: connected');
                 cb(null, client);
