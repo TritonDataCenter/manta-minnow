@@ -3,6 +3,7 @@
     "description": "Agent that publishes disk stats to moray (for picking)",
     "version": "1.0.0",
     "author": "Joyent (joyent.com)",
+    "license": "MPL-2.0",
     "private": true,
     "repository": {
         "type": "git",
