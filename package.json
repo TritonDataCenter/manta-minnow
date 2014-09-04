@@ -7,7 +7,7 @@
     "private": true,
     "repository": {
         "type": "git",
-        "url": "git+ssh://git@gitub.com:joyent.com/minnow.git"
+        "url": "git+ssh://git@github.com:joyent/manta-minnow.git"
     },
     "dependencies": {
         "assert-plus": "0.1.4",
