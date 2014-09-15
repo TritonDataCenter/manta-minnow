@@ -8,16 +8,11 @@
     Copyright (c) 2014, Joyent, Inc.
 -->
 
-# Minnow
+# manta-minnow
 
-Repository: <git@git.joyent.com:minnow.git>
-Browsing: <https://mo.joyent.com/minnow>
-Who: Mark Cavage
-Docs: <https://mo.joyent.com/docs/minnow>
-Tickets/bugs: <https://devhub.joyent.com/jira/browse/MANTA>
-
-
-# Overview
+This repository is part of the Joyent Manta project.  For contribution
+guidelines, issues, and general documentation, visit the main
+[Manta](http://github.com/joyent/manta) project page.
 
 This repo contains Minnow, the storage utilization agent.
 
@@ -29,7 +24,7 @@ to do that. Once you have it up, you can probably just use the
 dependencies, then:
 
     . ./env.sh
-	node main.js -vv -f ./etc/config.coal.json | bunyan
+    node main.js -vv -f ./etc/config.coal.json | bunyan
 
 And you should see minnow heartbeating statvfs output to moray.  You should be
 able to kill off the remote moray instance and restart it to see reconnect logic
