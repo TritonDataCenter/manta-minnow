@@ -57,7 +57,7 @@ CLEAN_FILES += node_modules
 
 RELEASE_TARBALL         := $(NAME)-pkg-$(STAMP).tar.bz2
 ROOT                    := $(shell pwd)
-TMPDIR                  := /tmp/$(STAMP)
+RELSTAGEDIR             := /tmp/$(STAMP)
 
 #
 # Repo-specific targets
@@ -73,20 +73,20 @@ test:
 .PHONY: release
 release: all docs $(SMF_MANIFESTS)
 	@echo "Building $(RELEASE_TARBALL)"
-	@mkdir -p $(TMPDIR)/root/opt/smartdc/$(NAME)
-	@mkdir -p $(TMPDIR)/site
-	@touch $(TMPDIR)/site/.do-not-delete-me
-	@mkdir -p $(TMPDIR)/root
-	@mkdir -p $(TMPDIR)/root/opt/smartdc/$(NAME)/etc
+	@mkdir -p $(RELSTAGEDIR)/root/opt/smartdc/$(NAME)
+	@mkdir -p $(RELSTAGEDIR)/site
+	@touch $(RELSTAGEDIR)/site/.do-not-delete-me
+	@mkdir -p $(RELSTAGEDIR)/root
+	@mkdir -p $(RELSTAGEDIR)/root/opt/smartdc/$(NAME)/etc
 	cp -r   $(ROOT)/build \
 		$(ROOT)/main.js \
 		$(ROOT)/node_modules \
 		$(ROOT)/package.json \
 		$(ROOT)/sapi_manifests \
 		$(ROOT)/smf \
-		$(TMPDIR)/root/opt/smartdc/$(NAME)
-	(cd $(TMPDIR) && $(TAR) -jcf $(ROOT)/$(RELEASE_TARBALL) root site)
-	@rm -rf $(TMPDIR)
+		$(RELSTAGEDIR)/root/opt/smartdc/$(NAME)
+	(cd $(RELSTAGEDIR) && $(TAR) -jcf $(ROOT)/$(RELEASE_TARBALL) root site)
+	@rm -rf $(RELSTAGEDIR)
 
 
 .PHONY: publish
