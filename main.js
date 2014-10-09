@@ -161,6 +161,13 @@ function createMorayClient(opts, cb) {
         var index = opts.bucket.index;
 
         client.removeListener('error', onConnectError);
+
+        client.on('error', function (err) {
+            // not much more to do because the moray client should take
+            // care of reconnecting, etc.
+            LOG.error(err, 'moray client error');
+        });
+
         client.putBucket(bname, {index: index}, function (err) {
             if (err) {
                 LOG.error(err, 'moray: putBucket: failed; will retry in 5 ' +
