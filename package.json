@@ -19,6 +19,9 @@
         "once": "1.2.0",
         "statvfs": "2.0.0"
     },
+    "sdcDependencies": {
+        "config-agent": ">=1.2.0"
+    },
     "scripts": {
         "start": "node ./main.js -f ./etc/config.json"
     }

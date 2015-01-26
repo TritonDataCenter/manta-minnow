@@ -28,7 +28,7 @@
         "objectRoot": "/manta",
         "manta_storage_id": "{{MANTA_STORAGE_ID}}",
         "manta_compute_id": "{{MANTA_COMPUTE_ID}}",
-        "server_uuid": "{{SERVER_UUID}}",
-        "zone_uuid": "{{ZONE_UUID}}",
+        "server_uuid": "{{auto.SERVER_UUID}}",
+        "zone_uuid": "{{auto.ZONENAME}}",
         "interval": 5000
 }
