@@ -53,7 +53,8 @@ var HEARTBEAT;
 var INTERVAL;
 var TIMER;
 var LAST_ERROR;
-
+var NERRORS = 0;
+var NERROR_THRESHOLD = 3;
 
 
 ///--- CLI Functions
@@ -137,7 +138,6 @@ function createMorayClient(opts, cb) {
     cb = once(cb);
 
     var retry = opts.retry || {};
-    retry.retries = retry.retries || Infinity;
     retry.minTimeout = retry.minTimeout || 2000;
     retry.maxTimeout = retry.maxTimeout || 120000;
     var client = moray.createClient({
@@ -149,40 +149,24 @@ function createMorayClient(opts, cb) {
         retry: retry
     });
 
-    function onConnectError(err) {
-        LOG.error(err, 'moray: connect: failed; will retry in 5 seconds');
-        client.removeListener('connect', onConnectSetup);
-        client.close();
-        setTimeout(createMorayClient.bind(null, opts, cb), 5000);
-    }
-
     function onConnectSetup() {
         var bname = opts.bucket.name;
         var index = opts.bucket.index;
 
-        client.removeListener('error', onConnectError);
-
-        client.on('error', function (err) {
-            // not much more to do because the moray client should take
-            // care of reconnecting, etc.
-            LOG.error(err, 'moray client error');
-        });
-
+        LOG.info('moray: connected, setting up buckets');
         client.putBucket(bname, {index: index}, function (err) {
             if (err) {
                 LOG.error(err, 'moray: putBucket: failed; will retry in 5 ' +
                           'seconds');
-                client.close();
-                setTimeout(createMorayClient.bind(null, opts, cb), 5000);
+                setTimeout(onConnectSetup, 5000);
             } else {
-                LOG.info('moray: connected');
+                LOG.info('moray: buckets set up');
                 cb(null, client);
             }
         });
     }
 
     client.once('connect', onConnectSetup);
-    client.once('error', onConnectError);
 }
 
 
@@ -236,11 +220,16 @@ function heartbeat(opts) {
 
         opts.moray.putObject(opts.bucket, key, stats, function (err) {
             if (err) {
-                LOG.error(err, 'moray: update failed');
+                if (++NERRORS >= NERROR_THRESHOLD) {
+                    LOG.error(err, 'moray: update failed');
+                } else {
+                    LOG.warn(err, 'moray: update failed');
+                }
                 LAST_ERROR = err;
                 return;
             }
 
+            NERRORS = 0;
             LAST_ERROR = null;
             LOG.info({
                 bucket: opts.bucket,

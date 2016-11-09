@@ -46,7 +46,7 @@
 
 	<exec_method type="method"
 		     name="start"
-		     exec="node main.js -f ./etc/config.json &amp;"
+		     exec="node --abort-on-uncaught-exception main.js -f ./etc/config.json &amp;"
 		     timeout_seconds="30">
 	    <method_context working_directory="/opt/smartdc/minnow">
                 <method_credential user="nobody"
