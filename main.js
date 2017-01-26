@@ -130,13 +130,11 @@ function configure() {
 
 function createMorayClient(opts, cb) {
     assert.object(opts, 'options');
-    assert.object(opts.log, 'options.log');
-    assert.optionalObject(opts.retry, 'options.retry');
     assert.func(cb, 'callback');
 
     cb = once(cb);
 
-    var moraycfg = opts.moray.morayConfig;
+    var moraycfg = opts.morayConfig;
     moraycfg.log = LOG.child({ 'component': 'MorayClient' });
     var client = moray.createClient(moraycfg);
 
