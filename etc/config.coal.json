@@ -13,14 +13,14 @@
                 "manta_storage_id": { "type": "string" }
             }
         },
-        "connectTimeout": 200,
-        "retry": {
-            "retries": null,
-            "minTimeout": 1000,
-            "maxTimeout": 60000
-        },
-        "host": "1.moray.coal.joyent.us",
-        "port": 2020
+        "morayConfig": {
+            "srvDomain": "{{STORAGE_MORAY_SHARD}}",
+            "cueballOptions": {
+                    "target": 1,
+                    "maximum": 1,
+                    "resolvers": [ "nameservice.{{DOMAIN_NAME}}" ]
+            }
+        }
     },
     "pingPort": 3030,
     "datacenter": "coal",
