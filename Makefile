@@ -32,6 +32,10 @@ JSL_FILES_NODE   = $(JS_FILES)
 JSSTYLE_FILES	 = $(JS_FILES)
 JSSTYLE_FLAGS    = -f tools/jsstyle.conf
 SMF_MANIFESTS_IN = smf/manifests/minnow.xml.in
+JSON_FILES	 = \
+    etc/config.coal.json \
+    package.json \
+    sapi_manifests/minnow/template
 
 #
 # Variables

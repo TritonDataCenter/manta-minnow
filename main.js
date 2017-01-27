@@ -5,7 +5,7 @@
  */
 
 /*
- * Copyright (c) 2014, Joyent, Inc.
+ * Copyright (c) 2017, Joyent, Inc.
  */
 
 var fs = require('fs');
@@ -111,6 +111,7 @@ function configure() {
     }
 
     assert.object(cfg.moray, 'config.moray');
+    assert.object(cfg.moray.morayConfig, 'config.moray.morayConfig');
     assertNonEmptyString(cfg.moray.bucket.name, 'cfg.moray.bucket.name');
     assertNonEmptyString(cfg.datacenter, 'cfg.datacenter');
     assertNonEmptyString(cfg.domain, 'cfg.domain');
@@ -119,8 +120,6 @@ function configure() {
     assertNonEmptyString(cfg.zone_uuid, 'cfg.zone_uuid');
     assertNonEmptyString(cfg.manta_compute_id, 'cfg.manta_compute_id');
     assertNonEmptyString(cfg.manta_storage_id, 'cfg.manta_storage_id');
-
-    cfg.moray.log = LOG;
 
     return (cfg);
 }
@@ -131,23 +130,13 @@ function configure() {
 
 function createMorayClient(opts, cb) {
     assert.object(opts, 'options');
-    assert.object(opts.log, 'options.log');
-    assert.optionalObject(opts.retry, 'options.retry');
     assert.func(cb, 'callback');
 
     cb = once(cb);
 
-    var retry = opts.retry || {};
-    retry.minTimeout = retry.minTimeout || 2000;
-    retry.maxTimeout = retry.maxTimeout || 120000;
-    var client = moray.createClient({
-        connectTimeout: opts.connectTimeout,
-        log: opts.log,
-        maxConnections: opts.maxConnections,
-        host: opts.host,
-        port: opts.port,
-        retry: retry
-    });
+    var moraycfg = opts.morayConfig;
+    moraycfg.log = LOG.child({ 'component': 'MorayClient' });
+    var client = moray.createClient(moraycfg);
 
     function onConnectSetup() {
         var bname = opts.bucket.name;
