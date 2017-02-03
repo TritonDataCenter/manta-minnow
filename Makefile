@@ -83,7 +83,8 @@ release: all docs $(SMF_MANIFESTS)
 	@touch $(RELSTAGEDIR)/site/.do-not-delete-me
 	@mkdir -p $(RELSTAGEDIR)/root
 	@mkdir -p $(RELSTAGEDIR)/root/opt/smartdc/$(NAME)/etc
-	cp -r   $(ROOT)/build \
+	cp -r   $(ROOT)/bin \
+		$(ROOT)/build \
 		$(ROOT)/main.js \
 		$(ROOT)/node_modules \
 		$(ROOT)/package.json \
