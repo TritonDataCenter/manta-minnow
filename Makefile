@@ -25,8 +25,9 @@
 #
 # Files
 #
+BASH_FILES	 = bin/check-minnow
 DOC_FILES	 = index.md
-JS_FILES	:= $(shell ls *.js)
+JS_FILES	:= $(wildcard *.js bin/*.js)
 JSL_CONF_NODE	 = tools/jsl.node.conf
 JSL_FILES_NODE   = $(JS_FILES)
 JSSTYLE_FILES	 = $(JS_FILES)
@@ -82,7 +83,8 @@ release: all docs $(SMF_MANIFESTS)
 	@touch $(RELSTAGEDIR)/site/.do-not-delete-me
 	@mkdir -p $(RELSTAGEDIR)/root
 	@mkdir -p $(RELSTAGEDIR)/root/opt/smartdc/$(NAME)/etc
-	cp -r   $(ROOT)/build \
+	cp -r   $(ROOT)/bin \
+		$(ROOT)/build \
 		$(ROOT)/main.js \
 		$(ROOT)/node_modules \
 		$(ROOT)/package.json \
