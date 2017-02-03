@@ -25,8 +25,9 @@
 #
 # Files
 #
+BASH_FILES	 = bin/check-minnow
 DOC_FILES	 = index.md
-JS_FILES	:= $(shell ls *.js)
+JS_FILES	:= $(wildcard *.js bin/*.js)
 JSL_CONF_NODE	 = tools/jsl.node.conf
 JSL_FILES_NODE   = $(JS_FILES)
 JSSTYLE_FILES	 = $(JS_FILES)
