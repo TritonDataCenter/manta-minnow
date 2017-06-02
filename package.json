@@ -15,7 +15,7 @@
         "cmdutil": "1.1.0",
         "dashdash": "1.3.2",
         "libmanta": "git+ssh://git@github.com:joyent/node-libmanta.git#master",
-        "moray": "3.0.0",
+        "moray": "3.2.0",
         "node-uuid": "1.4.0",
         "once": "1.2.0",
         "statvfs": "2.0.0",
