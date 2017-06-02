@@ -16,8 +16,8 @@
         "morayConfig": {
             "srvDomain": "1.moray.coal.joyent.us",
             "cueballOptions": {
-                    "target": 1,
-                    "maximum": 1,
+                    "target": 2,
+                    "maximum": 4,
                     "resolvers": [ "nameservice.coal.joyent.us" ]
             }
         }

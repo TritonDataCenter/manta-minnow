@@ -16,8 +16,8 @@
                 "morayConfig": {
                         "srvDomain": "{{STORAGE_MORAY_SHARD}}",
                         "cueballOptions": {
-                                "target": 1,
-                                "maximum": 1,
+                                "target": 2,
+                                "maximum": 4,
                                 "resolvers": [ "nameservice.{{DOMAIN_NAME}}" ]
                         }
                 }
