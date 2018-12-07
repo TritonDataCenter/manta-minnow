@@ -1,7 +1,7 @@
 {
     "name": "minnow",
     "description": "Agent that publishes disk stats to moray (for picking)",
-    "version": "1.0.1",
+    "version": "1.0.2",
     "author": "Joyent (joyent.com)",
     "license": "MPL-2.0",
     "private": true,
@@ -9,14 +9,12 @@
         "type": "git",
         "url": "git+ssh://git@github.com:joyent/manta-minnow.git"
     },
-    "// lru-cache": "attempting to pin version while satisfying transitive deps, because lru-cache@4.1.4 includes yallist@3 which breaks node --abort-on-uncaught-exception with node <v4",
     "dependencies": {
         "assert-plus": "0.1.4",
         "bunyan": "0.21.4",
         "cmdutil": "1.1.0",
         "dashdash": "1.3.2",
         "libmanta": "git+ssh://git@github.com:joyent/node-libmanta.git#master",
-        "lru-cache": "4.1.3",
         "moray": "3.3.0",
         "node-uuid": "1.4.0",
         "once": "1.2.0",
