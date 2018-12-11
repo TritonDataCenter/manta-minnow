@@ -1,5 +1,6 @@
 /node_modules
 /tmp
+bits
 build
 docs/*.json
 docs/*.html
@@ -7,4 +8,4 @@ cscope.in.out
 cscope.po.out
 cscope.out
 smf/manifests/*.xml
-*.tar.bz2
+*.tar.gz
