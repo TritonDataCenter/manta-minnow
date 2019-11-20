@@ -14,7 +14,7 @@
         "bunyan": "1.8.12",
         "cmdutil": "1.1.0",
         "dashdash": "1.3.2",
-        "libmanta": "https://github.com/joyent/node-libmanta.git#master",
+        "libmanta": "1.4.0",
         "moray": "3.7.0",
         "node-uuid": "1.4.0",
         "once": "1.2.0",
