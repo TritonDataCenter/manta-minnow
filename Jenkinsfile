@@ -49,7 +49,7 @@ make print-BRANCH print-STAMP all release publish bits-upload''')
                 branch 'master'
             }
             steps {
-                build(job:'mako', wait: false)
+                build(job:'joyent-org/mako/master', wait: false)
             }
         }
     }
