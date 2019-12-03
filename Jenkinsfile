@@ -43,6 +43,15 @@ export ENGBLD_BITS_UPLOAD_IMGAPI=true
 make print-BRANCH print-STAMP all release publish bits-upload''')
             }
         }
+        stage('mako') {
+            // TODO: Consider complex handling of multiple branches
+            when {
+                branch 'master'
+            }
+            steps {
+                build(job:'joyent-org/mako/master', wait: false)
+            }
+        }
     }
 
     post {
