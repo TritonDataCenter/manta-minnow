@@ -46,10 +46,10 @@ make print-BRANCH print-STAMP all release publish bits-upload''')
         stage('mako') {
             // TODO: Consider complex handling of multiple branches
             when {
-                branch 'master'
+                branch 'mantav1'
             }
             steps {
-                build(job:'mako', wait: false)
+                build(job:'joyent-org/manta-mako/mantav1', wait: false)
             }
         }
     }
