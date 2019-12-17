@@ -1,8 +1,3 @@
----
-title: Minnow: the storage utilization agent
-markdown2extras: tables, code-friendly
-apisections:
----
 <!--
     This Source Code Form is subject to the terms of the Mozilla Public
     License, v. 2.0. If a copy of the MPL was not distributed with this
@@ -10,7 +5,7 @@ apisections:
 -->
 
 <!--
-    Copyright (c) 2014, Joyent, Inc.
+    Copyright 2019 Joyent, Inc.
 -->
 
 # Minnow
