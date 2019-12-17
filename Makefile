@@ -26,7 +26,6 @@
 # Files
 #
 BASH_FILES	 = bin/check-minnow
-DOC_FILES	 = index.md
 JS_FILES	:= $(wildcard *.js bin/*.js)
 JSL_CONF_NODE	 = tools/jsl.node.conf
 JSL_FILES_NODE   = $(JS_FILES)
@@ -78,7 +77,7 @@ test:
 	@echo "No tests"
 
 .PHONY: release
-release: all docs $(SMF_MANIFESTS)
+release: all $(SMF_MANIFESTS)
 	@echo "Building $(RELEASE_TARBALL)"
 	@mkdir -p $(RELSTAGEDIR)/root/opt/smartdc/$(NAME)
 	@mkdir -p $(RELSTAGEDIR)/site
