@@ -5,7 +5,7 @@
 #
 
 #
-# Copyright 2019 Joyent, Inc.
+# Copyright 2020 Joyent, Inc.
 #
 
 #
@@ -65,6 +65,8 @@ CLEAN_FILES += node_modules
 RELEASE_TARBALL         := $(NAME)-pkg-$(STAMP).tar.gz
 ROOT                    := $(shell pwd)
 RELSTAGEDIR             := /tmp/$(NAME)-$(STAMP)
+
+ENGBLD_CHECK_COPYRIGHT_ARGS = -b mantav1
 
 #
 # Repo-specific targets
