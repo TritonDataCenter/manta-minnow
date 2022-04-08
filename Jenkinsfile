@@ -13,7 +13,7 @@
 pipeline {
 
     agent {
-        label joyCommonLabels(image_ver: '15.4.1', pkgsrc_arch: 'i386')
+        label joyCommonLabels(image_ver: '15.4.1')
     }
 
     options {
