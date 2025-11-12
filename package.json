@@ -18,7 +18,7 @@
         "moray": "3.8.1",
         "node-uuid": "1.4.0",
         "once": "1.2.0",
-        "statvfs": "2.2.0",
+        "statvfs": "git+https://github.com/TritonDataCenter/node-statvfs#MANTA-5487",
         "verror": "1.9.0"
     },
     "sdcDependencies": {
